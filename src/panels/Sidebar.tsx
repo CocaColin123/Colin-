@@ -28,7 +28,7 @@ interface PanelItem {
 const MAIN_NAV: NavItem[] = [
   { id: 'welcome', label: '扉页', icon: Book, eng: 'COVER' },
   { id: 'timeline', label: '时光', icon: Clock, eng: 'ARCHIVE' },
-  { id: 'export', label: '导出册', icon: Download, eng: 'EXPORT' },
+  { id: 'export', label: '管理', icon: Download, eng: 'MANAGE' },
 ];
 
 const SYSTEM_NAV: PanelItem[] = [

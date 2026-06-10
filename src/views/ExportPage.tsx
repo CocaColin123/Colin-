@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, CheckSquare, Download, Square } from 'lucide-react';
+import { ArrowLeft, CheckSquare, Download, Square, Trash2 } from 'lucide-react';
+import { api } from '../utils/api';
 import type { DiaryEntry } from '../types/diary';
 
 interface Props {
   entries: DiaryEntry[];
   onBack: () => void;
+  onRefresh: () => void;
 }
 
-export default function ExportPage({ entries, onBack }: Props) {
+export default function ExportPage({ entries, onBack, onRefresh }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => (a.meta.date || '').localeCompare(b.meta.date || '')),
@@ -33,6 +36,17 @@ export default function ExportPage({ entries, onBack }: Props) {
   const toggleAll = () => {
     if (allSelected) setSelected(new Set());
     else setSelected(new Set(sorted.map(entry => entry.filePath)));
+  };
+
+  const deleteSelected = async () => {
+    if (selected.size === 0 || !confirm(`删除选中的 ${selected.size} 篇日记？此操作不可撤销。`)) return;
+    setDeleting(true);
+    for (const filePath of selected) {
+      try { await api.deleteDiary(filePath); } catch {}
+    }
+    await onRefresh();
+    setSelected(new Set());
+    setDeleting(false);
   };
 
   const exportSelected = async () => {
@@ -86,8 +100,8 @@ export default function ExportPage({ entries, onBack }: Props) {
           </button>
 
           <div className="min-w-0 flex-1 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#8C7E6A]">Export Registry</p>
-            <h1 className="mt-1 font-serif text-3xl font-bold text-[#1A1A1A]">导出日记</h1>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#8C7E6A]">Manage Registry</p>
+            <h1 className="mt-1 font-serif text-3xl font-bold text-[#1A1A1A]">管理日记</h1>
             <p className="mt-1 text-sm text-[#8C7E6A]">{selected.size} / {sorted.length} 篇，{dateRange}</p>
           </div>
 
@@ -108,6 +122,15 @@ export default function ExportPage({ entries, onBack }: Props) {
             >
               <Download className="h-3.5 w-3.5" />
               {busy ? '导出中' : '导出所选'}
+            </button>
+            <button
+              type="button"
+              onClick={deleteSelected}
+              disabled={noneSelected || deleting}
+              className="inline-flex min-h-10 items-center gap-2 border border-[#902A2A]/30 bg-transparent px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-[#902A2A]/70 transition-colors hover:border-[#902A2A]/45 hover:bg-[#902A2A]/5 hover:text-[#902A2A] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#902A2A]/25 disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {deleting ? '删除中' : '删除所选'}
             </button>
           </div>
         </div>

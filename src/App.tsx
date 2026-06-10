@@ -165,7 +165,7 @@ export default function App() {
             {view === 'entry' && (
               <EntryWindow config={config!} onDone={() => { refresh(); setView('welcome'); }} onCancel={() => setView('welcome')} />
             )}
-            {view === 'export' && <ExportPage entries={entries} onBack={() => setView('timeline')} />}
+            {view === 'export' && <ExportPage entries={entries} onBack={() => setView('timeline')} onRefresh={refresh} />}
             {view === 'test' && <TestPage />}
           </motion.div>
         </AnimatePresence>

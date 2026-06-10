@@ -131,7 +131,7 @@ describe('archive utility pages visual shell', () => {
 
   it('keeps Export selection flow while using the export registry shell', () => {
     act(() => {
-      root.render(<ExportPage entries={[entry]} onBack={vi.fn()} />);
+      root.render(<ExportPage entries={[entry]} onBack={vi.fn()} onRefresh={vi.fn()} />);
     });
 
     expect(host.textContent).toContain('Export Registry');
