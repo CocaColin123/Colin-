@@ -27,22 +27,34 @@ export default function App() {
   const [selected, setSelected] = useState<DiaryEntry | null>(null);
   const [ready, setReady] = useState(false);
   const [initError, setInitError] = useState('');
+  const [staticMode, setStaticMode] = useState(false);
+
+  const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
 
   const init = useCallback(async () => {
+    if (isGitHubPages) {
+      setConfig(SAMPLE_CONFIG as any);
+      setEntries(SAMPLE_ENTRIES);
+      setStaticMode(true);
+      setReady(true);
+      return;
+    }
     try {
       setInitError('');
       const cfg = await api.readConfig();
       setConfig(cfg);
       const ents = await api.scanDiaries();
       setEntries(ents);
+      setStaticMode(false);
       if (window.location.search.includes('test')) { setReady(true); setView('test'); return; }
       setReady(true);
-    } catch (error) {
-      console.error('Init failed:', error);
-      setInitError(error instanceof Error ? error.message : '无法连接本地服务');
-      setTimeout(() => init(), 2000);
+    } catch {
+      setConfig(SAMPLE_CONFIG as any);
+      setEntries(SAMPLE_ENTRIES);
+      setStaticMode(true);
+      setReady(true);
     }
-  }, []);
+  }, [isGitHubPages]);
 
   useEffect(() => { init(); }, [init]);
 
